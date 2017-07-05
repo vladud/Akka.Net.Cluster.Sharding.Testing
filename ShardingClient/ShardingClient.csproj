@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A5E3B528-030D-44BA-9160-A2CC82277B1B}</ProjectGuid>
+    <ProjectGuid>{D5F78FFD-DB9D-46B4-AB77-EFA3639048BB}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ShardingNode</RootNamespace>
-    <AssemblyName>ShardingNode</AssemblyName>
+    <RootNamespace>ShardingClient</RootNamespace>
+    <AssemblyName>ShardingClient</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -38,17 +38,11 @@
     <Reference Include="Akka.Cluster, Version=1.2.2.40, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Akka.Cluster.1.2.2\lib\net45\Akka.Cluster.dll</HintPath>
     </Reference>
-    <Reference Include="Akka.Cluster.Sharding, Version=1.2.2.40, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Akka.Cluster.Sharding.1.2.2.40-beta\lib\net45\Akka.Cluster.Sharding.dll</HintPath>
-    </Reference>
     <Reference Include="Akka.Cluster.Tools, Version=1.2.2.39, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Akka.Cluster.Tools.1.2.2\lib\net45\Akka.Cluster.Tools.dll</HintPath>
     </Reference>
     <Reference Include="Akka.Logger.log4net, Version=1.2.9.7, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Akka.Logger.log4net.1.2.9\lib\net45\Akka.Logger.log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Akka.Persistence, Version=1.2.2.40, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Akka.Persistence.1.2.2.40-beta\lib\net45\Akka.Persistence.dll</HintPath>
     </Reference>
     <Reference Include="Akka.Remote, Version=1.2.2.40, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Akka.Remote.1.2.2\lib\net45\Akka.Remote.dll</HintPath>
@@ -120,7 +114,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyNode.cs" />
+    <Compile Include="MySender.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -133,10 +127,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Actor\ShardingActor.csproj">
-      <Project>{283472b9-0cd4-4c71-b906-17dcd37b0919}</Project>
-      <Name>ShardingActor</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{044dc2f3-9cf0-4c98-873d-00956ac8fa9c}</Project>
       <Name>Common</Name>
