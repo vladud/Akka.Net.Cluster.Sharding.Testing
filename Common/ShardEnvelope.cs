@@ -3,12 +3,14 @@
     public sealed class ShardEnvelope
     {
         public readonly string EntityId;
-        public readonly object Payload;
+        public readonly string Message;
+        public NodeId FromNodeId { get; set; } = NodeId.Unknown;
+        public ClientId FromClientId { get; set; } = ClientId.Unknown;
 
-        public ShardEnvelope(string entityId, object payload)
+        public ShardEnvelope(string entityId, string message)
         {
             EntityId = entityId;
-            Payload = payload;
+            Message = message;
         }
     }
 }

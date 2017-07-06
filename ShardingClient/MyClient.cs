@@ -15,39 +15,42 @@ namespace ShardingClient
 
         bool shouldStop;
 
+        private readonly ClientId clientId;
         private string clientName;
         private string envelopeId;
 
-        private const string HiMessage = "Hi!";
+        private const string SendMessage = "Knock, knock!";
 
         public MyClient(ClientId clientId)
         {
+            this.clientId = clientId;
             clientName = $"Client_{clientId}";
             envelopeId = ((int)clientId).ToString();
         }
 
         public void Start()
         {
-            using (var system = ActorSystem.Create(Constants.ActorSystemName, ConfigurationFactory.Load().WithFallback(ClusterSingletonManager.DefaultConfig())))
-            {
-                system.Settings.InjectTopLevelFallback(ClusterClientReceptionist.DefaultConfig());
-                var settings = ClusterClientSettings.Create(system);
-                var client = system.ActorOf(ClusterClient.Props(settings), clientName);
+            var system = ActorSystem.Create(Constants.ActorSystemName, ConfigurationFactory.Load().WithFallback(ClusterSingletonManager.DefaultConfig()));
+            system.Settings.InjectTopLevelFallback(ClusterClientReceptionist.DefaultConfig());
+            var settings = ClusterClientSettings.Create(system);
+            var client = system.ActorOf(ClusterClient.Props(settings), clientName);
 
-                while(!shouldStop)
-                {
-                    Console.WriteLine("Press key to send Hi");
-                    Console.ReadKey();
-                    client.Ask<ShardEnvelope>(new ClusterClient.Send("/user/sharding/MyActor", new ShardEnvelope(envelopeId, HiMessage)), TimeSpan.FromSeconds(10))
-                        .ContinueWith(se =>
+            while (!shouldStop)
+            {
+                Console.WriteLine("Press key to send message");
+                Console.ReadKey();
+                client.Ask<ShardEnvelope>(new ClusterClient.Send("/user/sharding/MyActor", new ShardEnvelope(envelopeId, SendMessage) { FromClientId = clientId }), TimeSpan.FromSeconds(10))
+                    .ContinueWith(se =>
+                                  {
+                                      if (se.Status == TaskStatus.Canceled)
                                       {
-                                          if (se.Status == TaskStatus.Canceled)
-                                          {
-                                              Logger.Warn("Did not receive response");
-                                          }
-                                          Logger.Info($"Received response with EntityId: {se.Result.EntityId}, Payload: {se.Result.Payload}");
-                                      });
-                }
+                                          Logger.Warn("He ignored me:(");
+                                      }
+                                      else
+                                      {
+                                          Logger.Info($"Received response with EntityId: {se.Result.EntityId}, Message: {se.Result.Message}, from NodeId: {se.Result.FromNodeId}");
+                                      }
+                                  });
             }
         }
 
