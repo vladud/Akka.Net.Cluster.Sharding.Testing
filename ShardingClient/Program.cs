@@ -1,4 +1,5 @@
-﻿using Topshelf;
+﻿using Common;
+using Topshelf;
 
 namespace ShardingClient
 {
@@ -6,20 +7,26 @@ namespace ShardingClient
     {
         static void Main(string[] args)
         {
+            var clientId = ClientId.One;
+
             HostFactory.Run(x =>
             {
                 x.UseLog4Net();
-                x.Service<MySender>(s =>
+                x.Service<MyClient>(s =>
                 {
-                    s.ConstructUsing(name => new MySender());
+                    s.ConstructUsing(name => new MyClient(clientId));
                     s.WhenStarted(n => n.Start());
                     s.WhenStopped(n => n.Stop());
                 });
-                x.RunAsLocalSystem();
+                //x.RunAsLocalSystem();
+                x.RunAsPrompt();
 
-                x.SetDescription("Sender");
-                x.SetDisplayName("Sender");
-                x.SetServiceName("Sender");
+                var cleintInfo = $"Client {clientId}";
+                x.SetDescription(cleintInfo);
+                x.SetDisplayName(cleintInfo);
+                x.SetServiceName(cleintInfo);
+
+                x.StartAutomaticallyDelayed();
             });
         }
     }

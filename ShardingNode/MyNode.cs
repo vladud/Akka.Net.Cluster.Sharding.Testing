@@ -7,6 +7,7 @@ using log4net;
 using ShardingActor;
 using System;
 using System.Collections.Generic;
+using Akka.Cluster.Tools.Client;
 
 namespace ShardingNode
 {
@@ -14,23 +15,31 @@ namespace ShardingNode
     {
         private static readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static Dictionary<NodeId, string> NodePorts = new Dictionary<NodeId, string>
+        private static readonly Dictionary<NodeId, string> NodePorts = new Dictionary<NodeId, string>
         {
             {NodeId.One, "5001" },
             {NodeId.Two, "5002" },
-            {NodeId.Three, "5003" },
+            {NodeId.Three, "5003" }
         };
 
-        private Config config;
+        private readonly Config config;
 
         private IActorRef shardRegion;
 
         public MyNode(NodeId nodeId)
         {
+            /*
+            config = ConfigurationFactory.ParseString($@"
+                akka.remote.dot-netty.tcp {{
+                    port = {NodePorts[nodeId]}
+                    hostname = 127.0.0.1
+                    log-transport = false
+                    }}
+                }}");
+            */
+
             config = ConfigurationFactory.ParseString($@"
                 akka.remote.helios.tcp {{
-                    transport-class = ""Akka.Remote.Transport.Helios.HeliosTcpTransport, Akka.Remote""
-                    transport-protocol = tcp
                     hostname = ""127.0.0.1""
                     port = {NodePorts[nodeId]}
                 }}");
@@ -40,22 +49,26 @@ namespace ShardingNode
         {
             Logger.Info("Start");
 
-            using (var system = ActorSystem.Create(Constants.ActorSystemName, ConfigurationFactory.Load().WithFallback(config).WithFallback(ClusterSingletonManager.DefaultConfig())))
+            using (var system = ActorSystem.Create(Constants.ActorSystemName, ConfigurationFactory.Load()
+                //.WithFallback(config)
+                .WithFallback(null)
+                .WithFallback(ClusterSingletonManager.DefaultConfig())))
             {
                 var sharding = ClusterSharding.Get(system);
-                var shardRegion = sharding.Start(
+                shardRegion = sharding.Start(
                     typeName: nameof(MyActor),
                     entityProps: Props.Create<MyActor>(), // the Props used to create entities
                     settings: ClusterShardingSettings.Create(system),
                     messageExtractor: new MessageExtractor(Constants.MaxNumberOfNodes * 10)
                 );
+                ClusterClientReceptionist.Get(system).RegisterService(shardRegion);
             }
         }
 
         public void Stop()
         {
             Logger.Info("Stop");
-            if (shardRegion != null) shardRegion.GracefulStop(TimeSpan.FromSeconds(5)).Wait();
+            shardRegion?.GracefulStop(TimeSpan.FromSeconds(5)).Wait();
         }
     }
 }

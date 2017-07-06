@@ -22,7 +22,8 @@ namespace ShardingNode
                     s.WhenStarted(n => n.Start());
                     s.WhenStopped(n => n.Stop());
                 });
-                x.RunAsLocalSystem();
+                //x.RunAsLocalSystem();
+                x.RunAsPrompt();
 
                 var nodeInfo = $"Node {nodeId}";
 
@@ -34,7 +35,8 @@ namespace ShardingNode
 
         private static NodeId GetNodeId(string nodeIdArg)
         {
-            if (int.TryParse(nodeIdArg, out int nodeIdNumber) && Enum.IsDefined(typeof(NodeId), nodeIdNumber))
+            int nodeIdNumber;
+            if (int.TryParse(nodeIdArg, out nodeIdNumber) && Enum.IsDefined(typeof(NodeId), nodeIdNumber))
             {
                 return (NodeId)nodeIdNumber;
             }
